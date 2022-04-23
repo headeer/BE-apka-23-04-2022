@@ -2,7 +2,7 @@
 
 namespace OfficeReservationService.Contracts.Models
 {
-    public class Firm
+    public class Company
     {
         public Guid CompanyId { get; set; }
         public List<IdentityUser> Admins { get; set; }
