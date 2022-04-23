@@ -50,6 +50,10 @@ builder.Services.AddDbContext<DataContext>(options => options.UseSqlite("Data so
 builder.Services.AddIdentityCore<AppUser>(opt => opt.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<DataContext>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+//builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IAdminPanelService, AdminPanelService>();
+//Add AutoMapper
+builder.Services.AddAutoMapper(typeof(MapperProfile));
 
 var app = builder.Build();
 
