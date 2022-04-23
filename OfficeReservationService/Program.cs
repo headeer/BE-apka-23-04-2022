@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OfficeReservationService.Contracts.Models;
 using OfficeReservationService.Data;
 using OfficeReservationService.Services.Classes;
 using OfficeReservationService.Services.Interfaces;
@@ -45,8 +46,8 @@ builder.Services.AddSwaggerGen(x =>
 
 // Add dbservice
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlite("Data source = OfficeReservationDatabase.db"));
-// Setup IdentityCore
-builder.Services.AddIdentityCore<IdentityUser>(opt => opt.SignIn.RequireConfirmedAccount = true)
+// Setup 
+builder.Services.AddIdentityCore<AppUser>(opt => opt.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<DataContext>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 

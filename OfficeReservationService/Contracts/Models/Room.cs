@@ -4,6 +4,8 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        List<Seating> Seatings { get; set; } = new List<Seating>();
+        public bool IsWorkSpaceRoom { get; set; }
+        public virtual List<Seating> Seatings { get; set; } = new List<Seating>();
+        public virtual Company Company { get; set; }
     }
 }
