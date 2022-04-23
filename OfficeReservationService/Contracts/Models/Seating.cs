@@ -3,6 +3,7 @@
     public class Seating
     {
         public Guid Id { get; set; }
+        public int CompanySeatingId { get; set; }
         public string? Description { get; set; }
         public bool IsOccupied { get; set; }
         public virtual Room Room { get; set; }
