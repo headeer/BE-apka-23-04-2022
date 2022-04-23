@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using OfficeReservationService.Contracts.Models;
+using OfficeReservationService.Domain;
 
 namespace OfficeReservationService.Data
 {
@@ -10,9 +11,11 @@ namespace OfficeReservationService.Data
             : base(options)
         {
         }
-        public Company Company{ get; set; }
-        public Room Room{ get; set; }
-        public Seating Seating{ get; set; }
+        public DbSet<Company> Company{ get; set; }
+        public DbSet<Room> Room{ get; set; }
+        public DbSet<Seating> Seating{ get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
