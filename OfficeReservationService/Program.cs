@@ -1,15 +1,19 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeReservationService.Contracts.Models;
 using OfficeReservationService.Data;
-using OfficeReservationService.Options;
-using System.Text;
+using OfficeReservationService.Services.Classes;
+using OfficeReservationService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -40,41 +44,12 @@ builder.Services.AddSwaggerGen(x =>
     });
 });
 
-var jwtSettings = new JwtSettings();
-builder.Configuration.Bind(nameof(jwtSettings), jwtSettings);
-builder.Services.AddSingleton(jwtSettings);
-
-//builder.Services.AddScoped<IIdentityService, IdentityService>();
-
-var tokenValidationParameters = new TokenValidationParameters
-{
-    ValidateIssuerSigningKey = true,
-    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
-    ValidateIssuer = false,
-    ValidateAudience = false,
-    RequireExpirationTime = false,
-    ValidateLifetime = true
-};
-builder.Services.AddSingleton(tokenValidationParameters);
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(x =>
-{
-    x.SaveToken = true;
-    x.TokenValidationParameters = tokenValidationParameters;
-});
-
-builder.Services.AddAuthorization();
-
 // Add dbservice
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlite("Data source = OfficeReservationDatabase.db"));
 // Setup 
 builder.Services.AddIdentityCore<AppUser>(opt => opt.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<DataContext>();
-
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
@@ -84,10 +59,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseAuthentication();
-app.UseRouting();
-app.UseAuthorization();
+
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
