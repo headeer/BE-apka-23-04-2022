@@ -4,6 +4,7 @@ namespace OfficeReservationService.Contracts.Requests
 {
     public class RoomDto
     {
+        public Guid CompanyId { get; set; }
         public int CompanyRoomId { get; set; }
         public string Name { get; set; }
         public bool IsWorkSpaceRoom { get; set; }

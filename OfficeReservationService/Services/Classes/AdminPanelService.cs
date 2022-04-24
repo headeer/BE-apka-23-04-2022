@@ -30,9 +30,38 @@ namespace OfficeReservationService.Services.Classes
         {
             var room = _mapper.Map<Room>(dto);
             room.Seatings = _mapper.Map<List<Seating>>(dto.Seatings);
+
+            var company = _context.Company.Where(x=>x.CompanyId == dto.CompanyId).FirstOrDefault();
+            if(company == null)
+            {
+                return false; 
+            }
+            room.Company = company;
             await _context.Room.AddAsync(room);
             var result = await _context.SaveChangesAsync();
             return result > 0;
+        }
+        //Remove after registration
+        public async Task<bool> TempCreateAdmin(RegistrationRequest request)
+        {
+            var user = new AppUser
+            {
+
+                Company = new Company
+                {
+                    CompanyId = Guid.NewGuid(),
+                    Rooms = new List<Room>(),
+                    Users = new List<AppUser>()
+                },
+                Email = request.Email,
+                UserName = request.Email
+            };
+            var a = await _userManager.CreateAsync(user, request.Password);
+
+            if (!a.Succeeded)
+                return false;
+            else
+                return true;
         }
     }
 }

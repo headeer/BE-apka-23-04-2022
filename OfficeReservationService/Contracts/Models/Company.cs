@@ -4,7 +4,6 @@
     {
         public Guid CompanyId { get; set; }
         public virtual List<AppUser>? Users { get; set; }
-        public virtual List <Room> Rooms { get; set; }
-
+        public virtual List<Room> Rooms { get; set; }
     }
 }

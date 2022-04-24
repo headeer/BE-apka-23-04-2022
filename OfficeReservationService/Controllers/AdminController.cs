@@ -46,5 +46,14 @@ namespace OfficeReservationService.Controllers
         {
             return Ok();
         }
+        //TODO: Remove after registration is done
+        [HttpPost("tempCreate")]
+        public async Task<IActionResult> CreateTemp([FromBody] RegistrationRequest request)
+        {
+            var response = await _adminService.TempCreateAdmin(request);
+            if(!response)
+                return BadRequest();
+            return Ok();
+        }
     }
 }
