@@ -11,8 +11,8 @@ using OfficeReservationService.Data;
 namespace OfficeReservationService.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220423151958_basicMigration")]
-    partial class basicMigration
+    [Migration("20220424082939_FreshMigration")]
+    partial class FreshMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -80,6 +80,10 @@ namespace OfficeReservationService.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -130,6 +134,8 @@ namespace OfficeReservationService.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -211,6 +217,113 @@ namespace OfficeReservationService.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.Company", b =>
+                {
+                    b.Property<Guid>("CompanyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CompanyId");
+
+                    b.ToTable("Company");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.Room", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CompanyRoomId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsWorkSpaceRoom")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("Room");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.Seating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CompanySeatingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsOccupied")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("Seating");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Domain.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Token")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Invalidated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Used")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.AppUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("TEXT");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasDiscriminator().HasValue("AppUser");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -260,6 +373,62 @@ namespace OfficeReservationService.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.Room", b =>
+                {
+                    b.HasOne("OfficeReservationService.Contracts.Models.Company", "Company")
+                        .WithMany("Rooms")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.Seating", b =>
+                {
+                    b.HasOne("OfficeReservationService.Contracts.Models.Room", "Room")
+                        .WithMany("Seatings")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Domain.RefreshToken", b =>
+                {
+                    b.HasOne("OfficeReservationService.Contracts.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.AppUser", b =>
+                {
+                    b.HasOne("OfficeReservationService.Contracts.Models.Company", "Company")
+                        .WithMany("Users")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.Company", b =>
+                {
+                    b.Navigation("Rooms");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("OfficeReservationService.Contracts.Models.Room", b =>
+                {
+                    b.Navigation("Seatings");
                 });
 #pragma warning restore 612, 618
         }

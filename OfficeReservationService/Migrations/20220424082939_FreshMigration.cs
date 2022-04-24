@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OfficeReservationService.Migrations
 {
-    public partial class basicMigration : Migration
+    public partial class FreshMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -24,28 +24,14 @@ namespace OfficeReservationService.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
+                name: "Company",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
+                    CompanyId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.PrimaryKey("PK_Company", x => x.CompanyId);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,6 +52,60 @@ namespace OfficeReservationService.Migrations
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
+                    CompanyId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Company_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Company",
+                        principalColumn: "CompanyId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Room",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CompanyRoomId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    IsWorkSpaceRoom = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CompanyId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Room", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Room_Company_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Company",
+                        principalColumn: "CompanyId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -154,6 +194,50 @@ namespace OfficeReservationService.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Token = table.Column<Guid>(type: "TEXT", nullable: false),
+                    JwtId = table.Column<string>(type: "TEXT", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Used = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Invalidated = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Token);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Seating",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CompanySeatingId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    IsOccupied = table.Column<bool>(type: "INTEGER", nullable: false),
+                    RoomId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Seating", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Seating_Room_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Room",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -186,10 +270,30 @@ namespace OfficeReservationService.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_CompanyId",
+                table: "AspNetUsers",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Room_CompanyId",
+                table: "Room",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Seating_RoomId",
+                table: "Seating",
+                column: "RoomId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -210,10 +314,22 @@ namespace OfficeReservationService.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "Seating");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Room");
+
+            migrationBuilder.DropTable(
+                name: "Company");
         }
     }
 }
